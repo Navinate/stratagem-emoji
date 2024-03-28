@@ -1,8 +1,14 @@
 <script>
-	import { identifyCommand } from '$lib';
+	import { getRandomStratagem, verifyCommandMatch, getCommandFromName } from '$lib';
 
 	$: stratagem_command = '';
-	$: stratagem_name = '';
+	let stratagem_name = getRandomStratagem();
+	/**
+	 * @type {HTMLHeadingElement}
+	 */
+	let guess;
+	let handicap = 0;
+	let score = 'Score: 0';
 
 	/**
 	 * @param {string} input
@@ -32,14 +38,36 @@
 				stratagem_command += '➡️';
 				break;
 			case ' ':
-				copyEmojiResult();
+				evaluateCommand();
 		}
-		stratagem_name = identifyCommand(stratagem_command);
 	}
 
-	function copyEmojiResult() {
-		navigator.clipboard.writeText(stratagem_command);
+	function evaluateCommand() {
+		const result = verifyCommandMatch(stratagem_name, stratagem_command);
+		console.log(result);
+		if (result) {
+			correctGuess();
+		} else {
+			incorrectGuess();
+		}
+	}
+
+	async function correctGuess() {
+		handicap = 0;
+		guess.classList.add('correct-guess');
+		score = `Score: ${parseInt(score.split(' ')[1]) + stratagem_command.length / 2}`;
 		stratagem_command = '';
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		guess.classList.remove('correct-guess');
+		stratagem_name = getRandomStratagem();
+	}
+	async function incorrectGuess() {
+		handicap++;
+		guess.classList.add('incorrect-guess');
+		score = `Score: ${parseInt(score.split(' ')[1]) - 1}`;
+		await new Promise((resolve) => setTimeout(resolve, 300));
+		guess.classList.remove('incorrect-guess');
+		stratagem_command = getCommandFromName(stratagem_name).substring(0, handicap);
 	}
 </script>
 
@@ -49,28 +77,26 @@
 	}}
 />
 <svelte:head>
-	<title>Stratagem ➡️ Emoji</title>
+	<title>Stratagem Quiz</title>
 </svelte:head>
 <header>
 	<div>
-		<h1>Stratagem ➡️ Emojis</h1>
+		<h1>Stratagem Quiz</h1>
 		<button
 			on:click={() => {
-				window.location.href = '/quiz';
-			}}>Quiz</button
+				window.location.href = '/';
+			}}>Emoji</button
 		>
 	</div>
 </header>
 <main>
-	<h3>{stratagem_name}</h3>
+	<h2>{score}</h2>
+	<h3 bind:this={guess}>{stratagem_name}</h3>
 	<hr />
 	<div class="result-container">
 		<span class="result">
 			{stratagem_command}
 		</span>
-		<button class="copy-button" on:click={copyEmojiResult}>
-			<img src="copy.svg" alt="copy button" />
-		</button>
 	</div>
 
 	<div class="button-container">
@@ -95,7 +121,7 @@
 			}}><img src="right.svg" alt="right arrow" /></button
 		>
 	</div>
-	<p>Press SPACEBAR to copy entry</p>
+	<p>Press SPACEBAR to guess</p>
 </main>
 <footer>
 	<p>
@@ -130,7 +156,7 @@
 	header button {
 		color: var(--yellow);
 		background-color: var(--blue);
-		font-size: 1.5rem;
+		font-size: 1.3rem;
 	}
 	main {
 		margin: 0 auto;
@@ -143,6 +169,11 @@
 		background-color: var(--blue);
 		height: 100vh;
 		color: var(--white);
+	}
+	h2 {
+		min-height: 1.5rem;
+		color: var(--white);
+		font-size: 2rem;
 	}
 	h3 {
 		min-height: 1.5rem;
@@ -179,11 +210,6 @@
 
 		display: grid;
 		place-items: center;
-	}
-	.copy-button {
-		height: 3rem;
-		aspect-ratio: 1;
-		font-size: 1.2rem;
 	}
 
 	.button-container {
@@ -239,5 +265,39 @@
 
 	footer a {
 		color: var(--blue);
+	}
+
+	:global(.correct-guess) {
+		color: lime;
+		text-shadow: 0px 0px 10px lime;
+	}
+	:global(.incorrect-guess) {
+		color: red;
+		text-shadow: 0px 0px 10px red;
+		animation: incorrect-guess 0.1s;
+	}
+
+	@keyframes incorrect-guess {
+		0% {
+			transform: translate(0px, 0px);
+		}
+		15% {
+			transform: translate(10px, 5px);
+		}
+		30% {
+			transform: translate(-10px, -5px);
+		}
+		45% {
+			transform: translate(0px, 0px);
+		}
+		60% {
+			transform: translate(10px, -5px);
+		}
+		85% {
+			transform: translate(-10px, 5px);
+		}
+		100% {
+			transform: translate(0px, 0px);
+		}
 	}
 </style>

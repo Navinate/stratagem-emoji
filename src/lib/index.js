@@ -21,6 +21,7 @@ const stratagemNames = {
 	'⬇️⬅️➡️⬆️⬇️': 'APW-1 Anti-Materiel Rifle',
 	'⬇️⬇️⬅️⬆️➡️': 'EAT-17 Expendable Anti-tank',
 	'⬇️⬇️⬆️⬅️➡️': 'LAS-99 Quasar Cannon',
+	'⬇️⬆️⬆️⬅️➡️': 'RL-77 Airburst Rocket Launcher',
 	//Mission Stratagems
 	'⬆️⬇️➡️⬅️⬆️': 'Reinforce',
 	'⬆️⬇️➡️⬆️': 'SOS Beacon',
